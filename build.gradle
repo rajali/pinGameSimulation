@@ -1,0 +1,97 @@
+subprojects {
+
+    apply plugin: 'idea'
+    apply plugin: 'checkstyle'
+    apply plugin: 'java'
+    apply plugin: 'jdepend'
+
+	ext {
+		projectVersion = '0.0.1-SNAPSHOT'
+		jdkVersion = 1.7 // Target JDK 7 only
+		checkstyleVersion = '5.6'
+	}    
+		
+	sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+    
+    repositories {
+        //No local maven repo is used.
+        mavenCentral()
+    }
+	
+	configurations {
+        provided
+    }
+
+    // Adds the provided JAR files to to the classpath
+    sourceSets {
+        main {
+            compileClasspath += configurations.provided
+        }
+        test {
+            compileClasspath += configurations.provided
+        }
+    }
+
+    test {
+        classpath += configurations.provided
+    }		
+
+    dependencies {
+
+		compile group:'commons-io', name:'commons-io', version:'1.4'
+
+
+        testCompile 'junit:junit:4.12'
+
+		////////////////////////////////////////////////////////////////////////
+		// Plugin dependencies
+		////////////////////////////////////////////////////////////////////////
+		checkstyle group:'com.puppycrawl.tools', name:'checkstyle', version: checkstyleVersion
+		jdepend group:'jdepend', name:'jdepend', version :'2.9.1'
+		jdepend group:'ant', name:'ant-jdepend', version :'1.8.4'
+    }
+
+    // Setup Checkstyle property to match the root of the project. The reason
+    // for this name for the property is that it matches that used by the
+    // Checkstyle Eclipse plugin.
+    checkstyle {
+        configProperties.project_loc = rootDir
+        // Set the location of the rules file to be the global one
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    }
+
+    // Setup Checkstyle classpath to find all provided stuff
+    checkstyleMain {
+        classpath += configurations.provided
+    }
+
+    checkstyleTest {
+        classpath += configurations.provided
+    }
+}
+
+project("pinBowling") {
+		
+	sourceSets {
+        main {
+            java {
+                srcDirs = ["src/main/java"]
+            }
+            resources {
+                srcDir "src/main/resources"
+            }
+        }
+        test {
+            java {
+                srcDirs = ["src/test/java"]
+            }
+			resources {
+                srcDir "src/test/resources"
+            }
+        }
+	}
+}
+
+task clean << {
+    delete buildDir
+}
